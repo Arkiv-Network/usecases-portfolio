@@ -16,4 +16,3 @@ pnpm dev
 ## Pages
 - `/` — gallery with filters
 - `/[slug]` — project detail
-- `/submit` — helper to generate JSON skeleton

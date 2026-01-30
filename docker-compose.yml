@@ -4,10 +4,6 @@ services:
   usecases:
     image: ghcr.io/arkiv-network/usecases-portfolio:latest
     container_name: usecases
-    env_file:
-      - .env
-    environment:
-      - NODE_ENV=production
     restart: unless-stopped
     networks:
       - moon_golem_network
@@ -16,7 +12,7 @@ services:
       - "traefik.http.routers.usecases.rule=Host(`usecases.arkiv.network`)"
       - "traefik.http.routers.usecases.entrypoints=websecure"
       - "traefik.http.routers.usecases.tls.certresolver=letsencrypt"
-      - "traefik.http.services.usecases.loadbalancer.server.port=3000"
+      - "traefik.http.services.usecases.loadbalancer.server.port=80"
 
 networks:
   moon_golem_network:

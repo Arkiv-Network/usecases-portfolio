@@ -1,29 +1,21 @@
-# Use official Node.js runtime as base image
-FROM node:18-alpine
+FROM oven/bun:1 AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Install bun
-RUN npm install -g bun
-
-# Copy package files
 COPY package.json bun.lockb* ./
 
-# Install dependencies with bun
 RUN bun install --frozen-lockfile
 
-# Copy source code
 COPY . .
 
-# Generate Tailwind CSS
-RUN bun run postinstall
+RUN bun run postinstall && bun run build
 
-# Build the application
-RUN bun run build
+FROM nginx:alpine
 
-# Expose port
-EXPOSE 3000
+COPY --from=builder /app/out /usr/share/nginx/html
 
-# Start the application
-CMD ["bun", "start"]
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
