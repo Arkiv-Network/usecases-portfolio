@@ -80,7 +80,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -105,7 +105,7 @@ jobs:
 
       - name: Pre-deployment health check
         run: |
-          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} '
+          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} 'set -e
             cd ${{ secrets.DEPLOY_PATH }}
             docker compose ps
             docker compose logs --tail=10 usecases
@@ -116,15 +116,24 @@ jobs:
           scp docker-compose.yml ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}/docker-compose.yml
 
       - name: Deploy with zero-downtime strategy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          USERNAME: ${{ github.actor }}
         run: |
-          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} '
+          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "set -e
             cd ${{ secrets.DEPLOY_PATH }}
 
             # Create backup of current state
             docker compose config > docker-compose.backup.yml
 
+            # Authenticate with GitHub Container Registry
+            echo $GITHUB_TOKEN | docker login ghcr.io -u $USERNAME --password-stdin
+
             # Pull new images
             docker compose pull
+
+            # Logout from registry
+            docker logout ghcr.io
 
             # Graceful restart
             docker compose up -d --no-deps usecases
@@ -132,11 +141,11 @@ jobs:
 
             # Cleanup old images
             docker image prune -f
-          '
+          "
 
       - name: Post-deployment verification
         run: |
-          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} '
+          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} 'set -e
             cd ${{ secrets.DEPLOY_PATH }}
 
             # Wait for services to be fully ready
