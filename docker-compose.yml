@@ -6,7 +6,7 @@ services:
     container_name: usecases
     restart: unless-stopped
     networks:
-      - arkiv_network
+      - moon_golem_network
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.usecases.rule=Host(`usecases.arkiv.network`)"
@@ -15,5 +15,5 @@ services:
       - "traefik.http.services.usecases.loadbalancer.server.port=80"
 
 networks:
-  arkiv_network:
+  moon_golem_network:
     external: true
