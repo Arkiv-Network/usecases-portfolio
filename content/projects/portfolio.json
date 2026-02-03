@@ -6,8 +6,8 @@
 	"category": ["portfolio", "data-infra", "showcase"],
 	"status": "live",
 	"liveUrl": "https://usecases.arkiv.network",
-	"repoUrl": "https://github.com/m00npl/usecases",
-	"chains": ["arkiv-holesky"],
+	"repoUrl": "https://github.com/Arkiv-Network/usecases-portfolio",
+	"chains": ["arkiv-kaolin"],
 	"usesArkiv": {
 		"annotations": true,
 		"btl": true,
@@ -15,12 +15,12 @@
 		"storage": true,
 		"pow": false
 	},
-	"golemDetails": "Portfolio stores project metadata as JSON entities with 2-year BTL (730 days × 43200 blocks). Uses string annotations for project identification, filtering, and versioning. Implements smart local caching with 24h revalidation. Falls back through hierarchy: Cache → Arkiv → Local Files. Images uploaded to imagedb.online with matching 2-year BTL.",
+	"arkivDetails": "Portfolio stores project metadata as JSON entities with 2-year BTL (730 days × 43200 blocks). Uses string annotations for project identification, filtering, and versioning. Implements smart local caching with 24h revalidation. Falls back through hierarchy: Cache → Arkiv → Local Files. Images uploaded to imagedb.usecases.arkiv.network with matching 2-year BTL.",
 	"features": [
 		"Project data storage on Arkiv with 2-year persistence",
 		"Smart local cache with daily revalidation and change detection",
 		"Hierarchical data loading: Cache → Arkiv → Local Files",
-		"Image storage via imagedb.online with 2-year BTL",
+		"Image storage via imagedb.usecases.arkiv.network with 2-year BTL",
 		"Modal image viewer with keyboard navigation and thumbnails",
 		"Individual badges for each Arkiv feature used",
 		"Docker containerization with environment variable support",
@@ -30,7 +30,7 @@
 	],
 	"sampleCode": {
 		"lang": "ts",
-		"code": "// Store project data with 2-year BTL\nconst btl = 365 * 2 * 43200; // 2 years in blocks\nconst projectData = {\n  projectId: project.slug,\n  data: project,\n  updatedAt: new Date().toISOString()\n};\n\nconst result = await writeClient.createEntities([{\n  btl: btl,\n  data: Buffer.from(JSON.stringify(projectData), 'utf8'),\n  stringAnnotations: [\n    { key: 'type', value: 'project_data' },\n    { key: 'project_id', value: project.slug },\n    { key: 'updated_at', value: new Date().toISOString() }\n  ],\n  numericAnnotations: []\n}]);\n\n// Smart cache with change detection\nconst cached = await cache.get('all-projects');\nif (cached) return cached;\n\nconst golemProjects = await golemStorage.getAllProjects();\nif (golemProjects.length > 0) {\n  await cache.set('all-projects', golemProjects);\n  return golemProjects;\n}"
+		"code": "// Store project data with 2-year BTL\nconst btl = 365 * 2 * 43200; // 2 years in blocks\nconst projectData = {\n  projectId: project.slug,\n  data: project,\n  updatedAt: new Date().toISOString()\n};\n\nconst result = await writeClient.createEntities([{\n  btl: btl,\n  data: Buffer.from(JSON.stringify(projectData), 'utf8'),\n  stringAnnotations: [\n    { key: 'type', value: 'project_data' },\n    { key: 'project_id', value: project.slug },\n    { key: 'updated_at', value: new Date().toISOString() }\n  ],\n  numericAnnotations: []\n}]);\n\n// Smart cache with change detection\nconst cached = await cache.get('all-projects');\nif (cached) return cached;\n\nconst arkivProjects = await arkivStorage.getAllProjects();\nif (arkivProjects.length > 0) {\n  await cache.set('all-projects', arkivProjects);\n  return arkivProjects;\n}"
 	},
 	"techStack": {
 		"frontend": [
@@ -49,9 +49,9 @@
 			"Buffer handling"
 		],
 		"storage": [
-			"Arkiv Holesky testnet",
+			"Arkiv Kaolin testnet",
 			"Local file cache",
-			"ImageDB.online integration",
+			"imagedb.usecases.arkiv.network integration",
 			"JSON fallback storage"
 		],
 		"infra": [
@@ -97,7 +97,7 @@
 		"performance": "~0ms cache hit, ~200ms Arkiv, ~50ms local files"
 	},
 	"imageHandling": {
-		"storage": "imagedb.online with 2-year BTL",
+		"storage": "imagedb.usecases.arkiv.network with 2-year BTL",
 		"upload": "Migration script converts local paths to imagedb URLs",
 		"modal": "Full-screen viewer with keyboard navigation",
 		"thumbnails": "Grid view with hover effects and zoom indicators",
@@ -113,7 +113,7 @@
 	"deployment": {
 		"container": "Docker with Next.js production build",
 		"port": "8850 (external) → 3000 (internal)",
-		"domain": "moon.dev.golem.network",
+		"domain": "portfolio.usecases.arkiv.network",
 		"envVars": "Arkiv credentials via .env file",
 		"buildProcess": "Multi-stage Docker build with bun install and next build"
 	},
@@ -128,7 +128,7 @@
 	},
 	"developmentTools": {
 		"scripts": {
-			"migrate:golem": "Migrate JSON data to Arkiv",
+			"migrate:arkiv": "Migrate JSON data to Arkiv",
 			"dev": "Development server with hot reload",
 			"build": "Production build with static generation"
 		},
